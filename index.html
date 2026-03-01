@@ -411,7 +411,10 @@ async function addExpense(){
   };
 
   await putExpense(exp);
-  clearForm(false);
+  sendToGoogleSheet(exp).catch(err => {
+  console.error("Google Sheet error:", err);
+  alert("Salvato localmente ma NON su Google Sheet.\nErrore: " + err.message);
+});clearForm(false);
   // set month view to expense month
   el("month").value = exp.month;
   await refresh();
@@ -709,4 +712,5 @@ async function importJSON(file){
 </script>
 </body>
 </html>
+
 
