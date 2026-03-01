@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SwissCareerPath — Spese</title>
+  <meta name="theme-color" content="#0b2a4a" />
+  <style>
+    :root { --bg:#0b2a4a; --card:#ffffff; --muted:#6b7280; --line:#e5e7eb; --ok:#065f46; --bad:#7f1d1d; }
+    body { font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial; margin:0; background:#f3f4f6; color:#111827; }
+    header { background:var(--bg); color:#fff; padding:14px 16px; position:sticky; top:0; z-index:5; }
+    header h1 { font-size:16px; margin:0; font-weight:700; }
+    header .sub { font-size:12px; opacity:.9; margin-top:2px; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 14px 12px 40px; }
+    .grid { display:grid; gap:12px; }
+    @media (min-width: 900px){ .grid { grid-template-columns: 1.1fr .9fr; } }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    .card h2 { margin:0 0 10px; font-size:14px; }
+    label { display:block; font-size:12px; color:#111827; margin:10px 0 6px; font-weight:600; }
+    input, select, textarea { width:100%; padding:10px; border:1px solid var(--line); border-radius:10px; font-size:14px; background:#fff; }
+    textarea { min-height: 72px; resize: vertical; }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .row3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
+    .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    button { border:0; border-radius:10px; padding:10px 12px; font-weight:700; font-size:14px; cursor:pointer; }
+    .primary { background:#0b2a4a; color:#fff; }
+    .ghost { background:#fff; border:1px solid var(--line); }
+    .danger { background:#fee2e2; color:#7f1d1d; border:1px solid #fecaca; }
+    .small { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.35; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { border-bottom:1px solid var(--line); padding:10px 6px; font-size:13px; vertical-align:top; }
+    th { text-align:left; font-size:12px; color:#374151; }
+    .tag { display:inline-block; font-size:11px; padding:3px 8px; border-radius:999px; border:1px solid var(--line); background:#f9fafb; color:#111827; }
+    .money { font-variant-numeric: tabular-nums; }
+    .kpis { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
+    .kpi { padding:10px; border:1px solid var(--line); border-radius:12px; background:#fbfbfd; }
+    .kpi .v { font-size:18px; font-weight:800; }
+    .kpi .l { font-size:12px; color:var(--muted); margin-top:2px; }
+    .flex { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .link { color:#0b2a4a; text-decoration: underline; cursor:pointer; font-weight:700; }
+    .receipt { display:flex; gap:8px; align-items:center; }
+    .receipt img { width:44px; height:44px; object-fit:cover; border-radius:8px; border:1px solid var(--line); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:12px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>SwissCareerPath — Gestione Spese</h1>
+  <div class="sub">Locale su iPhone • Upload ricevute • Export CSV • Backup/Restore</div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <!-- FORM -->
+    <section class="card" id="formCard">
+      <h2>Nuova spesa</h2>
+
+      <div class="row">
+        <div>
+          <label>Data</label>
+          <input id="date" type="date" />
+        </div>
+        <div>
+          <label>Importo</label>
+          <input id="amount" type="number" step="0.01" placeholder="es. 120.00" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Valuta</label>
+          <select id="currency">
+            <option>EUR</option>
+            <option>CHF</option>
+            <option>GBP</option>
+          </select>
+        </div>
+        <div>
+          <label>Metodo pagamento</label>
+          <select id="paymethod">
+            <option>Carta business</option>
+            <option>Bonifico</option>
+            <option>Carta personale (da rimborsare)</option>
+            <option>Contanti</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Fornitore</label>
+      <input id="vendor" placeholder="es. Swiss Air, SBB, Booking, LinkedIn" />
+
+      <label>Categoria</label>
+      <select id="category"></select>
+
+      <div class="row3">
+        <div>
+          <label>Trasferta?</label>
+          <select id="trip">
+            <option value="N">No</option>
+            <option value="S">Sì</option>
+          </select>
+        </div>
+        <div>
+          <label>Paese</label>
+          <select id="country">
+            <option value="MT">Malta (MT)</option>
+            <option value="CH">Svizzera (CH)</option>
+            <option value="IT">Italia (IT)</option>
+            <option value="UK">Regno Unito (UK)</option>
+            <option value="OTHER">Altro</option>
+          </select>
+        </div>
+        <div>
+          <label>Tipo</label>
+          <select id="type">
+            <option>Fattura</option>
+            <option>Ricevuta</option>
+            <option>Abbonamento</option>
+            <option>Biglietto</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Business purpose (1 riga)</label>
+      <input id="purpose" placeholder="es. Meeting cliente a Zurigo / networking / delivery sessione" />
+
+      <label>Note (opzionale)</label>
+      <textarea id="notes" placeholder="es. Partenza sabato per risparmio (screenshot confronto voli salvato)"></textarea>
+
+      <label>Ricevuta (foto o PDF)</label>
+      <input id="receipt" type="file" accept="image/*,application/pdf" />
+
+      <div class="btns">
+        <button class="primary" id="addBtn">Salva spesa</button>
+        <button class="ghost" id="clearBtn">Pulisci campi</button>
+      </div>
+
+      <div class="small">
+        Suggerimento: per trasferte con weekend “per risparmio”, inserisci nel campo Note:
+        <span class="mono">"Partenza anticipata per ottimizzazione costi"</span> e conserva screenshot confronto.
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section class="card">
+      <div class="flex" style="justify-content:space-between;">
+        <h2 style="margin:0;">Dashboard</h2>
+        <div class="flex">
+          <label style="margin:0; font-weight:700; font-size:12px;">Mese</label>
+          <input id="month" type="month" style="width:160px;" />
+        </div>
+      </div>
+
+      <div class="kpis" style="margin-top:10px;">
+        <div class="kpi">
+          <div class="v money" id="kpiTotal">€0.00</div>
+          <div class="l">Totale mese</div>
+        </div>
+        <div class="kpi">
+          <div class="v money" id="kpiTrips">€0.00</div>
+          <div class="l">Trasferte mese</div>
+        </div>
+        <div class="kpi">
+          <div class="v" id="kpiCount">0</div>
+          <div class="l">N. spese</div>
+        </div>
+      </div>
+
+      <div class="btns" style="margin-top:12px;">
+        <button class="ghost" id="exportCsvBtn">Export CSV (mese)</button>
+        <button class="ghost" id="exportJsonBtn">Backup JSON (tutto)</button>
+        <label class="ghost" style="padding:10px 12px; border-radius:10px; font-weight:800; cursor:pointer;">
+          Restore JSON
+          <input id="importJson" type="file" accept="application/json" style="display:none;">
+        </label>
+        <button class="danger" id="wipeBtn">Cancella tutto (solo se necessario)</button>
+      </div>
+
+      <div class="small">
+        CSV compatibile con il tuo Excel: include Data, Fornitore, Descrizione/Note, Categoria, Importo, Valuta, Metodo, Purpose, Trasferta, Paese, DocumentoID.
+      </div>
+
+      <h2 style="margin-top:14px;">Dettaglio spese mese</h2>
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Categoria</th>
+              <th>Fornitore</th>
+              <th>Importo</th>
+              <th>Ricevuta</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="list"></tbody>
+        </table>
+      </div>
+
+      <h2 style="margin-top:14px;">Breakdown categorie (mese)</h2>
+      <div id="breakdown" class="small"></div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+/* =========================
+   CONFIG
+========================= */
+const CATEGORIES = [
+  "Struttura societaria",
+  "Tech stack & software",
+  "Home office (quota)",
+  "Marketing & sito web",
+  "Formazione (ICF/CPD)",
+  "Hardware (quota ammort.)",
+  "Varie & imprevisti",
+  "Trasferte (accanton.)"
+];
+
+const DB_NAME = "swcp_expenses_db";
+const DB_VER  = 1;
+const STORE_EXP = "expenses";
+const STORE_REC = "receipts";
+
+function fmtMoney(n, cur="EUR"){
+  const map = { EUR:"€", CHF:"CHF ", GBP:"£" };
+  const sym = map[cur] ?? (cur+" ");
+  const v = (Number(n)||0).toFixed(2);
+  return sym + v;
+}
+
+function uid(){
+  return Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+
+/* =========================
+   INDEXEDDB
+========================= */
+let db;
+
+function openDB(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = (e)=>{
+      const d = e.target.result;
+      if(!d.objectStoreNames.contains(STORE_EXP)){
+        const s = d.createObjectStore(STORE_EXP, { keyPath: "id" });
+        s.createIndex("byMonth", "month", { unique:false });
+        s.createIndex("byDate", "date", { unique:false });
+      }
+      if(!d.objectStoreNames.contains(STORE_REC)){
+        d.createObjectStore(STORE_REC, { keyPath: "id" });
+      }
+    };
+    req.onsuccess = ()=> { db = req.result; resolve(db); };
+    req.onerror = ()=> reject(req.error);
+  });
+}
+
+function tx(store, mode="readonly"){
+  return db.transaction(store, mode).objectStore(store);
+}
+
+async function putExpense(exp){ return new Promise((res,rej)=>{
+  const r = tx(STORE_EXP,"readwrite").put(exp);
+  r.onsuccess=()=>res(true); r.onerror=()=>rej(r.error);
+});}
+
+async function getExpensesByMonth(month){ // YYYY-MM
+  return new Promise((res,rej)=>{
+    const idx = tx(STORE_EXP).index("byMonth");
+    const req = idx.getAll(month);
+    req.onsuccess=()=>res(req.result||[]);
+    req.onerror=()=>rej(req.error);
+  });
+}
+
+async function delExpense(id){ return new Promise((res,rej)=>{
+  const r = tx(STORE_EXP,"readwrite").delete(id);
+  r.onsuccess=()=>res(true); r.onerror=()=>rej(r.error);
+});}
+
+async function putReceipt(rec){ return new Promise((res,rej)=>{
+  const r = tx(STORE_REC,"readwrite").put(rec);
+  r.onsuccess=()=>res(true); r.onerror=()=>rej(r.error);
+});}
+
+async function getReceipt(id){ return new Promise((res,rej)=>{
+  const r = tx(STORE_REC).get(id);
+  r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(r.error);
+});}
+
+async function delReceipt(id){ return new Promise((res,rej)=>{
+  const r = tx(STORE_REC,"readwrite").delete(id);
+  r.onsuccess=()=>res(true); r.onerror=()=>rej(r.error);
+});}
+
+async function exportAll(){ // expenses + receipts metadata + blobs as base64
+  const allExp = await new Promise((res,rej)=>{
+    const r = tx(STORE_EXP).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error);
+  });
+  const allRec = await new Promise((res,rej)=>{
+    const r = tx(STORE_REC).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error);
+  });
+  // Convert blobs to base64 for portable backup
+  const recOut = [];
+  for(const rec of allRec){
+    const b64 = rec.blob ? await blobToBase64(rec.blob) : null;
+    recOut.push({ id:rec.id, name:rec.name, type:rec.type, base64:b64 });
+  }
+  return { version:1, exportedAt:new Date().toISOString(), expenses: allExp, receipts: recOut };
+}
+
+function blobToBase64(blob){
+  return new Promise((res,rej)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> res(reader.result);
+    reader.onerror = ()=> rej(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function restoreAll(payload){
+  if(!payload || !payload.expenses || !payload.receipts) throw new Error("Backup JSON non valido");
+  // wipe first
+  await wipeAll(false);
+  // restore receipts
+  for(const r of payload.receipts){
+    const blob = r.base64 ? await (await fetch(r.base64)).blob() : null;
+    await putReceipt({ id:r.id, name:r.name, type:r.type, blob });
+  }
+  // restore expenses
+  for(const e of payload.expenses){
+    await putExpense(e);
+  }
+}
+
+async function wipeAll(confirmUser=true){
+  if(confirmUser){
+    const ok = confirm("Confermi cancellazione totale? Questa azione non è reversibile se non hai un backup JSON.");
+    if(!ok) return;
+  }
+  await new Promise((res,rej)=>{
+    const t = db.transaction([STORE_EXP, STORE_REC], "readwrite");
+    t.objectStore(STORE_EXP).clear();
+    t.objectStore(STORE_REC).clear();
+    t.oncomplete=()=>res(true);
+    t.onerror=()=>rej(t.error);
+  });
+  await refresh();
+}
+
+/* =========================
+   UI / LOGIC
+========================= */
+const el = (id)=>document.getElementById(id);
+
+function setDefaults(){
+  // date today
+  const today = new Date();
+  el("date").valueAsDate = today;
+  // month current
+  const m = today.toISOString().slice(0,7);
+  el("month").value = m;
+
+  // categories
+  const sel = el("category");
+  sel.innerHTML = "";
+  for(const c of CATEGORIES){
+    const o = document.createElement("option");
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  }
+  sel.value = "Trasferte (accanton.)";
+}
+
+function monthOf(dateStr){ return dateStr?.slice(0,7) || ""; }
+
+async function addExpense(){
+  const date = el("date").value;
+  const amount = Number(el("amount").value);
+  if(!date || !amount || amount<=0){ alert("Inserisci data e importo valido."); return; }
+
+  const id = uid();
+  const receiptFile = el("receipt").files[0] || null;
+  let receiptId = null;
+
+  if(receiptFile){
+    receiptId = "rec_" + id;
+    await putReceipt({ id: receiptId, name: receiptFile.name, type: receiptFile.type, blob: receiptFile });
+  }
+
+  const exp = {
+    id,
+    date,
+    month: monthOf(date),
+    amount,
+    currency: el("currency").value,
+    vendor: el("vendor").value.trim(),
+    category: el("category").value,
+    paymethod: el("paymethod").value,
+    trip: el("trip").value, // S/N
+    country: el("country").value,
+    type: el("type").value,
+    purpose: el("purpose").value.trim(),
+    notes: el("notes").value.trim(),
+    receiptId
+  };
+
+  await putExpense(exp);
+  clearForm(false);
+  // set month view to expense month
+  el("month").value = exp.month;
+  await refresh();
+  alert("Spesa salvata.");
+}
+
+function clearForm(resetReceipt=true){
+  el("amount").value = "";
+  el("vendor").value = "";
+  el("purpose").value = "";
+  el("notes").value = "";
+  el("trip").value = "N";
+  el("country").value = "MT";
+  el("type").value = "Ricevuta";
+  if(resetReceipt) el("receipt").value = "";
+  el("category").value = "Trasferte (accanton.)";
+}
+
+async function refresh(){
+  const month = el("month").value;
+  const items = await getExpensesByMonth(month);
+  render(items);
+}
+
+async function render(items){
+  // KPIs (note: sums by currency are not converted; display as EUR-equivalent is not done)
+  // We'll show totals per currency and overall count; for monthly view you can filter by currency later if needed.
+  const totalByCur = {};
+  const tripsByCur = {};
+  const byCat = {};
+
+  for(const it of items){
+    totalByCur[it.currency] = (totalByCur[it.currency]||0) + it.amount;
+    if(it.category === "Trasferte (accanton.)" || it.trip==="S"){
+      tripsByCur[it.currency] = (tripsByCur[it.currency]||0) + it.amount;
+    }
+    byCat[it.category] = (byCat[it.category]||0) + it.amount;
+  }
+
+  // show totals (if multiple currencies: show as lines)
+  el("kpiTotal").textContent = Object.keys(totalByCur).length
+    ? Object.entries(totalByCur).map(([c,v])=>fmtMoney(v,c)).join(" • ")
+    : "€0.00";
+
+  el("kpiTrips").textContent = Object.keys(tripsByCur).length
+    ? Object.entries(tripsByCur).map(([c,v])=>fmtMoney(v,c)).join(" • ")
+    : "€0.00";
+
+  el("kpiCount").textContent = items.length;
+
+  // list
+  const tbody = el("list");
+  tbody.innerHTML = "";
+  // sort desc
+  items.sort((a,b)=> b.date.localeCompare(a.date));
+
+  for(const it of items){
+    const tr = document.createElement("tr");
+
+    const tdDate = document.createElement("td");
+    tdDate.textContent = it.date;
+    tr.appendChild(tdDate);
+
+    const tdCat = document.createElement("td");
+    tdCat.innerHTML = `<span class="tag">${escapeHtml(it.category)}</span>`;
+    tr.appendChild(tdCat);
+
+    const tdVen = document.createElement("td");
+    tdVen.textContent = it.vendor || "—";
+    tr.appendChild(tdVen);
+
+    const tdAmt = document.createElement("td");
+    tdAmt.className="money";
+    tdAmt.textContent = fmtMoney(it.amount, it.currency);
+    tr.appendChild(tdAmt);
+
+    const tdRec = document.createElement("td");
+    if(it.receiptId){
+      tdRec.innerHTML = `<span class="link" data-open="${it.id}">Apri</span>`;
+    } else {
+      tdRec.textContent = "—";
+    }
+    tr.appendChild(tdRec);
+
+    const tdAct = document.createElement("td");
+    tdAct.innerHTML = `<span class="link" data-del="${it.id}">Elimina</span>`;
+    tr.appendChild(tdAct);
+
+    tbody.appendChild(tr);
+  }
+
+  // click handlers
+  tbody.querySelectorAll("[data-del]").forEach(x=>{
+    x.addEventListener("click", async ()=>{
+      const id = x.getAttribute("data-del");
+      const ok = confirm("Eliminare questa spesa?");
+      if(!ok) return;
+      // get expense to delete receipt
+      const month = el("month").value;
+      const list = await getExpensesByMonth(month);
+      const found = list.find(e=>e.id===id);
+      if(found?.receiptId) await delReceipt(found.receiptId);
+      await delExpense(id);
+      await refresh();
+    });
+  });
+
+  tbody.querySelectorAll("[data-open]").forEach(x=>{
+    x.addEventListener("click", async ()=>{
+      const id = x.getAttribute("data-open");
+      const month = el("month").value;
+      const list = await getExpensesByMonth(month);
+      const found = list.find(e=>e.id===id);
+      if(!found?.receiptId) return;
+      const rec = await getReceipt(found.receiptId);
+      if(!rec) { alert("Ricevuta non trovata."); return; }
+      openReceipt(rec);
+    });
+  });
+
+  // breakdown
+  const b = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  if(!b.length){ el("breakdown").textContent = "Nessun dato per questo mese."; return; }
+  el("breakdown").innerHTML = b.map(([k,v])=>{
+    return `• <strong>${escapeHtml(k)}</strong>: ${fmtMoney(v, guessCurrency(items))}`;
+  }).join("<br>");
+}
+
+// heuristic for breakdown display: if single currency use it, else EUR
+function guessCurrency(items){
+  const set = new Set(items.map(i=>i.currency));
+  return set.size===1 ? [...set][0] : "EUR";
+}
+
+function openReceipt(rec){
+  // Create blob URL and open in new tab
+  const url = URL.createObjectURL(rec.blob);
+  window.open(url, "_blank");
+  // URL revoked later by browser; ok.
+}
+
+function escapeHtml(s){
+  return (s||"").replace(/[&<>"']/g, (c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[c]));
+}
+
+/* =========================
+   EXPORTS
+========================= */
+async function exportCSV(){
+  const month = el("month").value;
+  const items = await getExpensesByMonth(month);
+  // CSV header aligned with your Excel tracker fields
+  const cols = [
+    "Date","Vendor","Description","Category","Amount","Currency","PaymentMethod",
+    "BusinessPurpose","Trip","Country","DocumentID"
+  ];
+  const rows = [cols.join(",")];
+
+  for(const it of items){
+    const desc = (it.type ? it.type + " — " : "") + (it.notes || "");
+    const row = [
+      it.date,
+      csv(it.vendor),
+      csv(desc),
+      csv(it.category),
+      it.amount.toFixed(2),
+      it.currency,
+      csv(it.paymethod),
+      csv(it.purpose),
+      it.trip,
+      it.country,
+      it.receiptId ? it.receiptId : ""
+    ];
+    rows.push(row.join(","));
+  }
+
+  const blob = new Blob([rows.join("\n")], { type:"text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `SWCP_Expenses_${month}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function csv(v){
+  const s = (v ?? "").toString().replace(/\r?\n/g," ").trim();
+  if(s.includes(",") || s.includes('"')) return `"${s.replace(/"/g,'""')}"`;
+  return s;
+}
+
+async function exportJSON(){
+  const payload = await exportAll();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `SWCP_Backup_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function importJSON(file){
+  const text = await file.text();
+  const payload = JSON.parse(text);
+  await restoreAll(payload);
+  alert("Restore completato.");
+  await refresh();
+}
+
+/* =========================
+   INIT
+========================= */
+(async function(){
+  await openDB();
+  setDefaults();
+  await refresh();
+
+  el("addBtn").addEventListener("click", addExpense);
+  el("clearBtn").addEventListener("click", ()=>clearForm(true));
+  el("month").addEventListener("change", refresh);
+  el("exportCsvBtn").addEventListener("click", exportCSV);
+  el("exportJsonBtn").addEventListener("click", exportJSON);
+  el("importJson").addEventListener("change", async (e)=>{
+    const f = e.target.files[0];
+    if(f) await importJSON(f);
+    e.target.value = "";
+  });
+  el("wipeBtn").addEventListener("click", ()=>wipeAll(true));
+})();
+</script>
+</body>
+</html>
