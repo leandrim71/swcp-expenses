@@ -642,10 +642,71 @@ async function importJSON(file){
   el("importJson").addEventListener("change", async (e)=>{
     const f = e.target.files[0];
     if(f) await importJSON(f);
-    e.target.value = "";
+    e.target.value = ""; <script>
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9oMPnzoGxI-0-XCuOmg9UlSFgzy-eE0diVvOkl7mVpuEXJmExIVAQrNr5vaFpDxo57w/exec";
+
+  async function sendToGoogleSheet(expense) {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(expense),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || ("HTTP " + res.status));
+    }
+
+    return data;
+  }
+
+  function readExpenseFromPage() {
+    const val = (sel) => document.querySelector(sel)?.value?.trim() || "";
+
+    return {
+      date: val('input[type="date"]'),
+      amount: val('input[type="number"]'),
+      currency: val('[name="currency"]') || "EUR",
+      vendor: val('[name="vendor"]'),
+      category: val('[name="category"]'),
+      paymentMethod: val('[name="paymentMethod"]'),
+      trip: val('[name="trip"]'),
+      country: val('[name="country"]'),
+      type: val('[name="type"]'),
+      purpose: val('[name="purpose"]'),
+      notes: val('textarea'),
+      receiptLink: val('[name="receiptLink"]')
+    };
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const buttons = Array.from(document.querySelectorAll("button, input[type='submit']"));
+    const saveBtn = buttons.find(b =>
+      (b.innerText || b.value || "").toLowerCase().includes("salva spesa")
+    );
+
+    if (!saveBtn) {
+      console.warn("Bottone 'Salva spesa' non trovato.");
+      return;
+    }
+
+    saveBtn.addEventListener("click", async () => {
+      try {
+        const expense = readExpenseFromPage();
+        const result = await sendToGoogleSheet(expense);
+        console.log("Salvato su Google Sheet:", result);
+      } catch (err) {
+        console.error("Errore Google Sheet:", err);
+        alert("Salvato localmente ma NON su Google Sheet.\nErrore: " + err.message);
+      }
+    });
   });
+</script>
+  }); 
   el("wipeBtn").addEventListener("click", ()=>wipeAll(true));
 })();
 </script>
 </body>
 </html>
+
