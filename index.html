@@ -651,6 +651,24 @@ INIT
   });
   el("wipeBtn").addEventListener("click", ()=>wipeAll(true));
 })();
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFV2NdyKemDpp60cnfYBxQaS3t19ovWBnkQYpPGzuyeG6zDCK-Euy7j8DXy0msgU8k1g/exec";
+
+async function sendToGoogleSheet(expense) {
+  try {
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(expense)
+    });
+
+    const result = await response.json();
+    console.log("Google Sheet response:", result);
+  } catch (err) {
+    console.error("Errore Google Sheet:", err);
+  }
+}
 </script>
 </body>
 </html>
+
