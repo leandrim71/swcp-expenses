@@ -379,6 +379,8 @@ function setDefaults(){
   el("month").value = m;
 
   const sel = el("category");
+  sel.innerHTML = "<option>TEST - sto caricando</option>";
+alert("setDefaults() eseguita");
   sel.innerHTML = "";
   for(const c of CATEGORIES){
     const o = document.createElement("option");
@@ -671,4 +673,5 @@ async function sendToGoogleSheet(expense) {
 </script>
 </body>
 </html>
+
 
